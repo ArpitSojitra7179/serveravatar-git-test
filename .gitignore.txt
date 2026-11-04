@@ -1,0 +1,4 @@
+.env
+/vendor/
+/node_modules/
+/public_html/deployment-check.txt
