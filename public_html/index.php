@@ -17,7 +17,7 @@ $deploymentStatus = file_exists($deploymentFile)
 </head>
 <body>
 
-    <h1>Git Integration Test Successful!</h1>
+    <h1>Git Integration Test - Version 2!</h1>
 
     <p>My PHP application is running on ServerAvatar.</p>
 
