@@ -13,11 +13,11 @@ $deploymentStatus = file_exists($deploymentFile)
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ServerAvatar Git Test</title>
+    <title>Bitbucket Integration Test</title>
 </head>
 <body>
 
-    <h1>Git Integration Test - Version 3!</h1>
+    <h1>Bitbucket Integration Test Successful!</h1>
 
     <p>My PHP application is running on ServerAvatar.</p>
 
