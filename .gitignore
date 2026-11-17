@@ -48,3 +48,21 @@ Thumbs.db
 *.mov
 *.wmv
 
+# Database credentials
+/config/database.local.php
+
+# Environment files
+.env
+.env.*
+
+# Editor files
+.vscode/
+.idea/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
