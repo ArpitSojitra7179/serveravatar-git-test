@@ -2,9 +2,13 @@
 
 declare(strict_types=1);
 
+// Start the application session.
 if (session_status() === PHP_SESSION_NONE) {
-    $isHttps = !empty($_SERVER['HTTPS'])
-        && $_SERVER['HTTPS'] !== 'off';
+
+    $isHttps = (
+        isset($_SERVER['HTTPS']) &&
+        $_SERVER['HTTPS'] !== 'off'
+    );
 
     session_set_cookie_params([
         'lifetime' => 0,
@@ -17,6 +21,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Load common application functions.
 require_once __DIR__ . '/functions.php';
 
+// Load database connection.
 $pdo = require __DIR__ . '/../config/database.php';
