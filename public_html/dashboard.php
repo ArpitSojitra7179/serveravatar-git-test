@@ -1,28 +1,49 @@
 <?php
 
+declare(strict_types=1);
+
 require_once __DIR__ . '/../includes/bootstrap.php';
+require_once __DIR__ . '/../includes/auth.php';
 
 require_login();
 
 $pageTitle = 'Dashboard';
 
-$stmt = $pdo->prepare(
-    "SELECT id, name, email, created_at
-     FROM users
-     WHERE id = :id
-     LIMIT 1"
-);
+try {
+    $stmt = $pdo->prepare(
+        "SELECT id, name, email, role, status, created_at
+         FROM users
+         WHERE id = :id
+         LIMIT 1"
+    );
 
-$stmt->execute([
-    'id' => $_SESSION['user_id']
-]);
+    $stmt->execute([
+        'id' => $_SESSION['user_id'],
+    ]);
 
-$user = $stmt->fetch();
+    $user = $stmt->fetch();
 
-if (!$user) {
-    $_SESSION = [];
-    session_regenerate_id(true);
-    redirect('login.php');
+    if (!$user) {
+        logout_user();
+        redirect('login.php');
+    }
+
+    // A user blocked after logging in must lose access.
+    if ($user['status'] !== 'active') {
+        logout_user();
+        redirect('login.php');
+    }
+
+    // Keep session details synchronized with the database.
+    $_SESSION['user_name'] = $user['name'];
+    $_SESSION['user_email'] = $user['email'];
+    $_SESSION['user_role'] = $user['role'];
+
+} catch (Throwable $e) {
+    error_log('Dashboard error: ' . $e->getMessage());
+
+    http_response_code(500);
+    exit('Unable to load the dashboard. Please try again later.');
 }
 
 require __DIR__ . '/../includes/header.php';
@@ -54,6 +75,16 @@ require __DIR__ . '/../includes/header.php';
         </div>
 
         <div class="info-item">
+            <span>Role</span>
+            <strong><?= e(ucfirst($user['role'])) ?></strong>
+        </div>
+
+        <div class="info-item">
+            <span>Account Status</span>
+            <strong><?= e(ucfirst($user['status'])) ?></strong>
+        </div>
+
+        <div class="info-item">
             <span>Registered At</span>
             <strong><?= e($user['created_at']) ?></strong>
         </div>
@@ -68,6 +99,20 @@ require __DIR__ . '/../includes/header.php';
     <p class="bottom-text">
         Your account information is being retrieved from MySQL.
     </p>
+
+    <form method="POST" action="logout.php">
+
+        <input
+            type="hidden"
+            name="csrf_token"
+            value="<?= e(csrf_token()) ?>"
+        >
+
+        <button type="submit" class="btn">
+            Logout
+        </button>
+
+    </form>
 
 </div>
 

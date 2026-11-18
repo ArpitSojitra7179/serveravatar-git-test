@@ -1,6 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 require_once __DIR__ . '/../includes/bootstrap.php';
+require_once __DIR__ . '/../includes/auth.php';
 
 if (is_logged_in()) {
     redirect('dashboard.php');
@@ -12,44 +15,43 @@ $error = '';
 $email = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
     verify_csrf();
 
-    $email = trim($_POST['email'] ?? '');
+    $emailInput = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
 
     if (
-        !filter_var($email, FILTER_VALIDATE_EMAIL) ||
-        !is_string($password) ||
-        $password === ''
+        !is_string($emailInput) ||
+        !is_string($password)
     ) {
         $error = 'Please enter valid login details.';
     } else {
+        $email = strtolower(trim($emailInput));
 
-        $stmt = $pdo->prepare(
-            "SELECT id, name, email, password
-             FROM users
-             WHERE email = :email
-             LIMIT 1"
-        );
-
-        $stmt->execute(['email' => $email]);
-
-        $user = $stmt->fetch();
-
-        if ($user && password_verify($password, $user['password'])) {
-
-            session_regenerate_id(true);
-
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['user_name'] = $user['name'];
-            $_SESSION['user_email'] = $user['email'];
-
-            redirect('dashboard.php');
-
+        if (
+            !filter_var($email, FILTER_VALIDATE_EMAIL) ||
+            $password === ''
+        ) {
+            $error = 'Please enter valid login details.';
         } else {
+            try {
+                $result = authenticate_user(
+                    $pdo,
+                    $email,
+                    $password
+                );
 
-            $error = 'Incorrect email or password.';
+                if ($result === 'success') {
+                    redirect('dashboard.php');
+                } elseif ($result === 'blocked') {
+                    $error = 'Your account is blocked. Please contact the administrator.';
+                } else {
+                    $error = 'Incorrect email or password.';
+                }
+            } catch (Throwable $e) {
+                error_log('Login error: ' . $e->getMessage());
+                $error = 'Login is temporarily unavailable. Please try again.';
+            }
         }
     }
 }

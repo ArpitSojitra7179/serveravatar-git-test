@@ -1,6 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 require_once __DIR__ . '/../includes/bootstrap.php';
+require_once __DIR__ . '/../includes/auth.php';
 
 if (is_logged_in()) {
     redirect('dashboard.php');
@@ -15,49 +18,47 @@ $name = '';
 $email = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
     verify_csrf();
 
-    $name = trim($_POST['name'] ?? '');
-    $email = trim($_POST['email'] ?? '');
+    $nameInput = $_POST['name'] ?? '';
+    $emailInput = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
     $confirmPassword = $_POST['confirm_password'] ?? '';
 
-    if (!is_string($password) || !is_string($confirmPassword)) {
-        $error = 'Invalid password input.';
-    } elseif ($name === '' || strlen($name) > 100) {
-        $error = 'Name is required and must not exceed 100 characters.';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 150) {
-        $error = 'Please enter a valid email address.';
-    } elseif (strlen($password) < 8) {
-        $error = 'Password must contain at least 8 characters.';
-    } elseif ($password !== $confirmPassword) {
-        $error = 'Passwords do not match.';
+    if (
+        !is_string($nameInput) ||
+        !is_string($emailInput) ||
+        !is_string($password) ||
+        !is_string($confirmPassword)
+    ) {
+        $error = 'Invalid form input.';
     } else {
+        $name = trim($nameInput);
+        $email = strtolower(trim($emailInput));
 
-        $stmt = $pdo->prepare(
-            "SELECT id FROM users WHERE email = :email LIMIT 1"
-        );
-
-        $stmt->execute(['email' => $email]);
-
-        if ($stmt->fetch()) {
-
-            $error = 'This email is already registered.';
-
+        if ($name === '' || strlen($name) > 100) {
+            $error = 'Name is required and must not exceed 100 characters.';
+        } elseif (
+            !filter_var($email, FILTER_VALIDATE_EMAIL) ||
+            strlen($email) > 150
+        ) {
+            $error = 'Please enter a valid email address.';
+        } elseif (strlen($password) < 8) {
+            $error = 'Password must contain at least 8 characters.';
+        } elseif ($password !== $confirmPassword) {
+            $error = 'Passwords do not match.';
         } else {
-
-            $hashedPassword = password_hash(
-                $password,
-                PASSWORD_DEFAULT
-            );
-
-            $stmt = $pdo->prepare(
-                "INSERT INTO users (name, email, password)
-                 VALUES (:name, :email, :password)"
-            );
-
             try {
+                $hashedPassword = password_hash(
+                    $password,
+                    PASSWORD_DEFAULT
+                );
+
+                $stmt = $pdo->prepare(
+                    "INSERT INTO users (name, email, password)
+                     VALUES (:name, :email, :password)"
+                );
+
                 $stmt->execute([
                     'name' => $name,
                     'email' => $email,
@@ -68,9 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $name = '';
                 $email = '';
-
             } catch (PDOException $e) {
-
                 if ($e->getCode() === '23000') {
                     $error = 'This email is already registered.';
                 } else {
