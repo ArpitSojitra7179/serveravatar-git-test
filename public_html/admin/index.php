@@ -149,6 +149,10 @@ require __DIR__ . '/../../includes/header.php';
         <a href="../dashboard.php" class="btn">
             Back to User Dashboard
         </a>
+
+        <a href="users.php" class="btn">
+            Manage Users
+        </a>
     </div>
 
 </div>
