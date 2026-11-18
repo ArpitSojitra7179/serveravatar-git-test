@@ -1,7 +1,26 @@
-
 <?php
 
 declare(strict_types=1);
+
+// Temporary diagnostic code starts here
+$debugLog = __DIR__ . '/../storage/logs/login-debug.log';
+
+register_shutdown_function(function () use ($debugLog) {
+    $error = error_get_last();
+
+    if ($error !== null) {
+        $message = sprintf(
+            "[%s] Type: %s | Message: %s | File: %s | Line: %d\n",
+            date('Y-m-d H:i:s'),
+            $error['type'],
+            $error['message'],
+            $error['file'],
+            $error['line']
+        );
+
+        @file_put_contents($debugLog, $message, FILE_APPEND);
+    }
+});
 
 require_once __DIR__ . '/../includes/bootstrap.php';
 require_once __DIR__ . '/../includes/auth.php';
