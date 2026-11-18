@@ -100,19 +100,7 @@ require __DIR__ . '/../includes/header.php';
         Your account information is being retrieved from MySQL.
     </p>
 
-    <form method="POST" action="logout.php">
 
-        <input
-            type="hidden"
-            name="csrf_token"
-            value="<?= e(csrf_token()) ?>"
-        >
-
-        <button type="submit" class="btn">
-            Logout
-        </button>
-
-    </form>
 
 </div>
 

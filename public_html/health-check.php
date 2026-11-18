@@ -9,76 +9,56 @@ $checks = [
 ];
 
 try {
-
     require_once __DIR__ . '/../includes/bootstrap.php';
 
     $checks['Database Connection'] = true;
 
-    $statement = $pdo->query(
-        "SHOW TABLES LIKE 'users'"
-    );
-
+    $statement = $pdo->query("SHOW TABLES LIKE 'users'");
     $checks['Users Table'] = $statement->fetchColumn() !== false;
 
 } catch (Throwable $exception) {
-
-    error_log(
-        'Health check failed: ' . $exception->getMessage()
-    );
-
+    error_log('Health check failed: ' . $exception->getMessage());
 }
 
 $pageTitle = 'Health Check - ServerAvatar Testing Lab';
 
 require_once __DIR__ . '/../includes/header.php';
 
+$allPassed = !in_array(false, $checks, true);
 ?>
 
-<h1 class="fw-bold mb-2">System Health Check</h1>
+<section class="page-heading">
+    <h1 class="page-title">System health check</h1>
+    <p class="page-description">
+        Check the PHP application, required extensions and database environment.
+    </p>
+</section>
 
-<p class="text-muted mb-4">
-    Check the current PHP application and database environment.
-</p>
-
-<div class="card shadow-sm">
-    <div class="card-body">
-
+<section class="panel" aria-label="System health results">
+    <div class="health-list">
         <?php foreach ($checks as $name => $passed): ?>
-
-            <div class="d-flex justify-content-between
-                        align-items-center border-bottom py-3">
-
-                <span class="fw-semibold">
-                    <?= e($name) ?>
-                </span>
-
+            <div class="health-row">
+                <span class="health-name"><?= e($name) ?></span>
                 <?php if ($passed): ?>
-
-                    <span class="badge text-bg-success">
-                        Passed
-                    </span>
-
+                    <span class="badge badge-success">Passed</span>
                 <?php else: ?>
-
-                    <span class="badge text-bg-danger">
-                        Failed
-                    </span>
-
+                    <span class="badge badge-danger">Failed</span>
                 <?php endif; ?>
-
             </div>
-
         <?php endforeach; ?>
-
     </div>
-</div>
+</section>
 
-<div class="mt-4">
-
-    <a href="index.php" class="btn btn-outline-primary">
-        Back to Home
-    </a>
-
+<div class="health-actions">
+    <?php if ($allPassed): ?>
+        <span class="pill pill-success">All system checks passed</span>
+    <?php else: ?>
+        <span class="pill pill-danger">One or more checks need attention</span>
+    <?php endif; ?>
+    <div class="actions">
+        <a href="index.php" class="btn btn-secondary">Back to home</a>
+        <a href="health-check.php" class="btn">Run checks again</a>
+    </div>
 </div>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
