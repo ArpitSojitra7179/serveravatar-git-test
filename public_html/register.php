@@ -65,10 +65,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'password' => $hashedPassword,
                 ]);
 
-                $success = 'Registration successful! You can now login.';
+                $_SESSION['registration_success'] =
+                    'Registration successful! Please login to your account.';
 
-                $name = '';
-                $email = '';
+                redirect('login.php');
             } catch (PDOException $e) {
                 if ($e->getCode() === '23000') {
                     $error = 'This email is already registered.';

@@ -14,6 +14,11 @@ $pageTitle = 'Login';
 $error = '';
 $email = '';
 
+$_SESSION['registration_success'] =
+    'Registration successful! Please login to your account.';
+
+redirect('login.php');
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
 
@@ -70,6 +75,12 @@ require __DIR__ . '/../includes/header.php';
     <?php if ($error): ?>
         <div class="alert error">
             <?= e($error) ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($success): ?>
+        <div class="alert success">
+            <?= e($success) ?>
         </div>
     <?php endif; ?>
 
