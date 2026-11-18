@@ -1,3 +1,4 @@
+
 <?php
 
 declare(strict_types=1);
@@ -14,10 +15,10 @@ $pageTitle = 'Login';
 $error = '';
 $email = '';
 
-$_SESSION['registration_success'] =
-    'Registration successful! Please login to your account.';
+// Display registration success message once.
+$success = $_SESSION['registration_success'] ?? '';
 
-redirect('login.php');
+unset($_SESSION['registration_success']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verify_csrf();
@@ -72,15 +73,15 @@ require __DIR__ . '/../includes/header.php';
         Login to your account.
     </p>
 
-    <?php if ($error): ?>
-        <div class="alert error">
-            <?= e($error) ?>
-        </div>
-    <?php endif; ?>
-
     <?php if ($success): ?>
         <div class="alert success">
             <?= e($success) ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if ($error): ?>
+        <div class="alert error">
+            <?= e($error) ?>
         </div>
     <?php endif; ?>
 
