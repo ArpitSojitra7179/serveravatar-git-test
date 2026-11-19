@@ -95,14 +95,33 @@ function logout_user(): void
 /**
  * Check whether the logged-in user has one of the required roles.
  */
+
 function require_role(array $roles): void
 {
     require_login();
 
-    $role = $_SESSION['user_role'] ?? '';
+    global $pdo;
 
-    if (!is_string($role) || !in_array($role, $roles, true)) {
+    $stmt = $pdo->prepare(
+        'SELECT role, status FROM users WHERE id = :id LIMIT 1'
+    );
+
+    $stmt->execute([
+        'id' => (int) $_SESSION['user_id'],
+    ]);
+
+    $account = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$account || $account['status'] !== 'active') {
+        logout_user();
+        redirect('/login.php');
+    }
+
+    // Refresh the role from the database on every protected request.
+    $_SESSION['user_role'] = $account['role'];
+
+    if (!in_array($account['role'], $roles, true)) {
         http_response_code(403);
-        exit('Access denied. You do not have permission to access this page.');
+        exit('403 Forbidden: You do not have permission to access this page.');
     }
 }

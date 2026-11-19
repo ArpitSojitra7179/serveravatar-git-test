@@ -117,6 +117,25 @@ require __DIR__ . '/../../includes/header.php';
             </div>
         <?php endif; ?>
 
+
+        <?php if (isset($_GET['role_updated']) && $_GET['role_updated'] === '1'): ?>
+            <div class="alert success">
+                User role updated successfully.
+            </div>
+        <?php endif; ?>
+
+        <?php if (($_GET['role_error'] ?? '') === 'self'): ?>
+            <div class="alert">
+                You cannot change your own administrator role.
+            </div>
+        <?php endif; ?>
+
+        <?php if (($_GET['role_error'] ?? '') === 'last_admin'): ?>
+            <div class="alert">
+                You cannot demote the last administrator.
+            </div>
+        <?php endif; ?>
+
         <div class="user-details-grid">
 
             <div class="user-detail-item">
@@ -161,6 +180,51 @@ require __DIR__ . '/../../includes/header.php';
             >
                 Edit User
             </a>
+
+
+            <div class="card" style="margin-top: 20px;">
+                <h3>Manage User Role</h3>
+
+                <p>
+                    Current role:
+                    <strong><?= e(ucfirst($user['role'])) ?></strong>
+                </p>
+
+                <form action="/admin/change-role.php" method="POST">
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="<?= e(csrf_token()) ?>"
+                    >
+
+                    <input
+                        type="hidden"
+                        name="user_id"
+                        value="<?= e((string) $user['id']) ?>"
+                    >
+
+                    <div class="form-group">
+                        <label for="role">Select Role</label>
+
+                        <select name="role" id="role" required>
+                            <option value="user"
+                                <?= $user['role'] === 'user' ? 'selected' : '' ?>>
+                                User
+                            </option>
+
+                            <option value="admin"
+                                <?= $user['role'] === 'admin' ? 'selected' : '' ?>>
+                                Admin
+                            </option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn">
+                        Update Role
+                    </button>
+                </form>
+            </div>
+
 
             <a href="/admin/users.php" class="btn">
                 Back to Users
