@@ -33,6 +33,8 @@ if (!$user) {
     exit('User not found.');
 }
 
+$updated = isset($_GET['updated']) && $_GET['updated'] === '1';
+
 $pageTitle = 'User Details';
 
 require __DIR__ . '/../../includes/header.php';
@@ -109,6 +111,12 @@ require __DIR__ . '/../../includes/header.php';
             View account information for this registered user.
         </p>
 
+        <?php if ($updated): ?>
+            <div class="alert success">
+                User information updated successfully.
+            </div>
+        <?php endif; ?>
+
         <div class="user-details-grid">
 
             <div class="user-detail-item">
@@ -146,6 +154,13 @@ require __DIR__ . '/../../includes/header.php';
         </div>
 
         <div class="detail-actions">
+
+            <a
+                href="/admin/edit-user.php?id=<?= e((string) $user['id']) ?>"
+                class="btn"
+            >
+                Edit User
+            </a>
 
             <a href="/admin/users.php" class="btn">
                 Back to Users
