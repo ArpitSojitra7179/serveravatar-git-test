@@ -390,6 +390,7 @@ require __DIR__ . '/../../includes/header.php';
                         <th>Role</th>
                         <th>Status</th>
                         <th>Registered At</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
 
@@ -418,6 +419,15 @@ require __DIR__ . '/../../includes/header.php';
 
                             <td>
                                 <?= e(date('d M Y', strtotime($user['created_at']))) ?>
+                            </td>
+
+                            <td>
+                                <a
+                                    href="/admin/view-user.php?id=<?= e((string) $user['id']) ?>"
+                                    class="btn btn-secondary"
+                                >
+                                    View
+                                </a>
                             </td>
                         </tr>
 
