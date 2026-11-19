@@ -33,7 +33,9 @@ if (!$user) {
     exit('User not found.');
 }
 
-$updated = isset($_GET['updated']) && $_GET['updated'] === '1';
+$updated = ($_GET['updated'] ?? '') === '1';
+$roleUpdated = ($_GET['role_updated'] ?? '') === '1';
+$roleError = $_GET['role_error'] ?? '';
 
 $pageTitle = 'User Details';
 
@@ -59,6 +61,7 @@ require __DIR__ . '/../../includes/header.php';
 }
 
 .user-detail-item {
+    min-width: 0;
     padding: 17px;
     background: #f8fafc;
     border: 1px solid #e3eaf3;
@@ -79,14 +82,61 @@ require __DIR__ . '/../../includes/header.php';
     font-size: 15px;
 }
 
+/* Separate role management section */
+.role-management-card {
+    margin-top: 25px;
+    padding: 22px;
+    background: #f8fafc;
+    border: 1px solid #e3eaf3;
+    border-radius: 12px;
+}
+
+.role-management-card h2 {
+    margin: 0 0 10px;
+    font-size: 19px;
+}
+
+.role-management-card p {
+    margin: 0 0 15px;
+    color: #66758c;
+}
+
+.role-management-card label {
+    display: block;
+    margin: 12px 0 7px;
+    font-weight: 700;
+}
+
+.role-management-card select {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    min-height: 46px;
+    padding: 10px 12px;
+    border: 1px solid #d7e0ed;
+    border-radius: 10px;
+    background: #fff;
+    color: #17243b;
+    font: inherit;
+}
+
+.role-management-card button {
+    margin-top: 15px;
+}
+
+/* Navigation buttons */
 .detail-actions {
     display: flex;
-    gap: 12px;
+    align-items: center;
     flex-wrap: wrap;
+    gap: 12px;
     margin-top: 25px;
 }
 
 .detail-actions .btn {
+    width: auto;
+    min-width: 120px;
+    min-height: 46px;
     margin: 0;
 }
 
@@ -98,143 +148,157 @@ require __DIR__ . '/../../includes/header.php';
     .user-details-card {
         padding: 20px;
     }
+
+    .role-management-card {
+        padding: 18px;
+    }
+
+    .detail-actions {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .detail-actions .btn {
+        width: 100%;
+    }
 }
 </style>
 
-<div class="container">
+<div class="user-details-card">
 
-    <div class="user-details-card">
+    <h1 class="page-title">User Details</h1>
 
-        <h1 class="page-title">User Details</h1>
+    <p class="page-description">
+        View account information for this registered user.
+    </p>
 
-        <p class="page-description">
-            View account information for this registered user.
+    <?php if ($updated): ?>
+        <div class="alert success">
+            User information updated successfully.
+        </div>
+    <?php endif; ?>
+
+    <?php if ($roleUpdated): ?>
+        <div class="alert success">
+            User role updated successfully.
+        </div>
+    <?php endif; ?>
+
+    <?php if ($roleError === 'self'): ?>
+        <div class="alert error">
+            You cannot change your own administrator role.
+        </div>
+    <?php endif; ?>
+
+    <?php if ($roleError === 'last_admin'): ?>
+        <div class="alert error">
+            You cannot demote the last administrator.
+        </div>
+    <?php endif; ?>
+
+    <div class="user-details-grid">
+
+        <div class="user-detail-item">
+            <span>User ID</span>
+            <strong><?= e((string) $user['id']) ?></strong>
+        </div>
+
+        <div class="user-detail-item">
+            <span>Full Name</span>
+            <strong><?= e($user['name']) ?></strong>
+        </div>
+
+        <div class="user-detail-item">
+            <span>Email Address</span>
+            <strong><?= e($user['email']) ?></strong>
+        </div>
+
+        <div class="user-detail-item">
+            <span>Role</span>
+            <strong><?= e(ucfirst($user['role'])) ?></strong>
+        </div>
+
+        <div class="user-detail-item">
+            <span>Account Status</span>
+            <strong><?= e(ucfirst($user['status'])) ?></strong>
+        </div>
+
+        <div class="user-detail-item">
+            <span>Registration Date</span>
+            <strong>
+                <?= e(date('d M Y, h:i A', strtotime($user['created_at']))) ?>
+            </strong>
+        </div>
+
+    </div>
+
+    <!-- Role management is now outside the action buttons container. -->
+    <div class="role-management-card">
+
+        <h2>Manage User Role</h2>
+
+        <p>
+            Current role:
+            <strong><?= e(ucfirst($user['role'])) ?></strong>
         </p>
 
-        <?php if ($updated): ?>
-            <div class="alert success">
-                User information updated successfully.
-            </div>
-        <?php endif; ?>
+        <form action="/admin/change-role.php" method="POST">
 
-
-        <?php if (isset($_GET['role_updated']) && $_GET['role_updated'] === '1'): ?>
-            <div class="alert success">
-                User role updated successfully.
-            </div>
-        <?php endif; ?>
-
-        <?php if (($_GET['role_error'] ?? '') === 'self'): ?>
-            <div class="alert">
-                You cannot change your own administrator role.
-            </div>
-        <?php endif; ?>
-
-        <?php if (($_GET['role_error'] ?? '') === 'last_admin'): ?>
-            <div class="alert">
-                You cannot demote the last administrator.
-            </div>
-        <?php endif; ?>
-
-        <div class="user-details-grid">
-
-            <div class="user-detail-item">
-                <span>User ID</span>
-                <strong><?= e((string) $user['id']) ?></strong>
-            </div>
-
-            <div class="user-detail-item">
-                <span>Full Name</span>
-                <strong><?= e($user['name']) ?></strong>
-            </div>
-
-            <div class="user-detail-item">
-                <span>Email Address</span>
-                <strong><?= e($user['email']) ?></strong>
-            </div>
-
-            <div class="user-detail-item">
-                <span>Role</span>
-                <strong><?= e(ucfirst($user['role'])) ?></strong>
-            </div>
-
-            <div class="user-detail-item">
-                <span>Account Status</span>
-                <strong><?= e(ucfirst($user['status'])) ?></strong>
-            </div>
-
-            <div class="user-detail-item">
-                <span>Registration Date</span>
-                <strong>
-                    <?= e(date('d M Y, h:i A', strtotime($user['created_at']))) ?>
-                </strong>
-            </div>
-
-        </div>
-
-        <div class="detail-actions">
-
-            <a
-                href="/admin/edit-user.php?id=<?= e((string) $user['id']) ?>"
-                class="btn"
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="<?= e(csrf_token()) ?>"
             >
-                Edit User
-            </a>
 
+            <input
+                type="hidden"
+                name="user_id"
+                value="<?= e((string) $user['id']) ?>"
+            >
 
-            <div class="card" style="margin-top: 20px;">
-                <h3>Manage User Role</h3>
+            <label for="role">Select Role</label>
 
-                <p>
-                    Current role:
-                    <strong><?= e(ucfirst($user['role'])) ?></strong>
-                </p>
+            <select name="role" id="role" required>
+                <option
+                    value="user"
+                    <?= $user['role'] === 'user' ? 'selected' : '' ?>
+                >
+                    User
+                </option>
 
-                <form action="/admin/change-role.php" method="POST">
-                    <input
-                        type="hidden"
-                        name="csrf_token"
-                        value="<?= e(csrf_token()) ?>"
-                    >
+                <option
+                    value="admin"
+                    <?= $user['role'] === 'admin' ? 'selected' : '' ?>
+                >
+                    Admin
+                </option>
+            </select>
 
-                    <input
-                        type="hidden"
-                        name="user_id"
-                        value="<?= e((string) $user['id']) ?>"
-                    >
+            <button type="submit" class="btn">
+                Update Role
+            </button>
 
-                    <div class="form-group">
-                        <label for="role">Select Role</label>
+        </form>
 
-                        <select name="role" id="role" required>
-                            <option value="user"
-                                <?= $user['role'] === 'user' ? 'selected' : '' ?>>
-                                User
-                            </option>
+    </div>
 
-                            <option value="admin"
-                                <?= $user['role'] === 'admin' ? 'selected' : '' ?>>
-                                Admin
-                            </option>
-                        </select>
-                    </div>
+    <!-- Navigation buttons have their own separate container. -->
+    <div class="detail-actions">
 
-                    <button type="submit" class="btn">
-                        Update Role
-                    </button>
-                </form>
-            </div>
+        <a
+            href="/admin/edit-user.php?id=<?= e((string) $user['id']) ?>"
+            class="btn"
+        >
+            Edit User
+        </a>
 
+        <a href="/admin/users.php" class="btn btn-secondary">
+            Back to Users
+        </a>
 
-            <a href="/admin/users.php" class="btn">
-                Back to Users
-            </a>
-
-            <a href="/admin/index.php" class="btn btn-secondary">
-                Admin Dashboard
-            </a>
-
-        </div>
+        <a href="/admin/index.php" class="btn btn-secondary">
+            Admin Dashboard
+        </a>
 
     </div>
 
