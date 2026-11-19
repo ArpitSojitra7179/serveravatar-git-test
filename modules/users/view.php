@@ -196,6 +196,26 @@ require __DIR__ . '/../../includes/header.php';
         </div>
     <?php endif; ?>
 
+
+    <?php if (($_GET['status_updated'] ?? '') === '1'): ?>
+        <div class="alert success">
+            User account status updated successfully.
+        </div>
+    <?php endif; ?>
+
+    <?php if ($roleError = ($_GET['status_error'] ?? '') === 'self'): ?>
+        <div class="alert error">
+            You cannot block your own administrator account.
+        </div>
+    <?php endif; ?>
+
+    <?php if (($_GET['status_error'] ?? '') === 'last_admin'): ?>
+        <div class="alert error">
+            You cannot block the last active administrator.
+        </div>
+    <?php endif; ?>
+
+
     <div class="user-details-grid">
 
         <div class="user-detail-item">
@@ -281,6 +301,58 @@ require __DIR__ . '/../../includes/header.php';
         </form>
 
     </div>
+
+    
+    <!-- Account status management -->
+    <div class="role-management-card">
+
+        <h2>Manage Account Status</h2>
+
+        <p>
+            Current status:
+            <strong><?= e(ucfirst($user['status'])) ?></strong>
+        </p>
+
+        <form action="/admin/change-status.php" method="POST">
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="<?= e(csrf_token()) ?>"
+            >
+
+            <input
+                type="hidden"
+                name="user_id"
+                value="<?= e((string) $user['id']) ?>"
+            >
+
+            <label for="account_status">Select Status</label>
+
+            <select name="status" id="account_status" required>
+                <option
+                    value="active"
+                    <?= $user['status'] === 'active' ? 'selected' : '' ?>
+                >
+                    Active
+                </option>
+
+                <option
+                    value="blocked"
+                    <?= $user['status'] === 'blocked' ? 'selected' : '' ?>
+                >
+                    Blocked
+                </option>
+            </select>
+
+            <button type="submit" class="btn">
+                Update Status
+            </button>
+
+        </form>
+
+    </div>
+
 
     <!-- Navigation buttons have their own separate container. -->
     <div class="detail-actions">
